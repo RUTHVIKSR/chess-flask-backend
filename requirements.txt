@@ -5,4 +5,4 @@ Flask-Cors
 joblib
 gunicorn
 numpy
-scikit-learn
+scikit-learn==1.5.2
