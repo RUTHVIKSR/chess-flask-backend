@@ -19,6 +19,8 @@ def receive_pgn():
     if not pgn:
         return jsonify({"error": "No PGN data received"}), 400
 
+    # Convert literal "\n" sequences to actual newline characters
+    pgn = pgn.replace("\\n", "\n")
     print("Received PGN:", pgn, flush=True)
 
     # Process PGN using python-chess
@@ -26,7 +28,7 @@ def receive_pgn():
     if game is None:
         return jsonify({"error": "Invalid PGN format"}), 400
 
-    # Alternative: extract moves using mainline_moves
+    # Extract moves using mainline_moves
     moves_list = [move.uci() for move in game.mainline_moves()]
         
     print("Parsed Game:", game, flush=True)
