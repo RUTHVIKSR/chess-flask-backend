@@ -1,3 +1,4 @@
+import os
 from flask import Flask, request, jsonify
 import chess.pgn
 from flask_cors import CORS
@@ -18,23 +19,21 @@ def receive_pgn():
     if not pgn:
         return jsonify({"error": "No PGN data received"}), 400
 
-    print("Received PGN:", pgn)  # You can process this further
+    print("Received PGN:", pgn, flush=True)
 
     # Process PGN using python-chess
     game = chess.pgn.read_game(io.StringIO(pgn))
     if game is None:
         return jsonify({"error": "Invalid PGN format"}), 400
 
-    moves_list = []
-    node = game
-    while node.variations:
-        node = node.variation(0)
-        moves_list.append(node.move.uci())
+    # Alternative: extract moves using mainline_moves
+    moves_list = [move.uci() for move in game.mainline_moves()]
         
-    print("Parsed Game:", game)
-    print("Extracted Moves:", moves_list)
+    print("Parsed Game:", game, flush=True)
+    print("Extracted Moves:", moves_list, flush=True)
 
     return jsonify({"message": "PGN received successfully", "moves": moves_list})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=10000)
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host='0.0.0.0', port=port)
