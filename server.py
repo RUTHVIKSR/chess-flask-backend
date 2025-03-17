@@ -3,6 +3,7 @@ from flask import Flask, request, jsonify
 import chess.pgn
 from flask_cors import CORS
 import io
+import prediction_backend  # Import the prediction module
 
 app = Flask(__name__)
 CORS(app)
@@ -21,20 +22,23 @@ def receive_pgn():
 
     # Convert literal "\n" sequences to actual newline characters
     pgn = pgn.replace("\\n", "\n")
-    print("Received PGN:", pgn, flush=True)
-
-    # Process PGN using python-chess
-    game = chess.pgn.read_game(io.StringIO(pgn))
-    if game is None:
-        return jsonify({"error": "Invalid PGN format"}), 400
-
-    # Extract moves using mainline_moves
-    moves_list = [move.uci() for move in game.mainline_moves()]
+    
+    try:
+        # Predict Elo ratings using the model
+        white_elo, black_elo = prediction_backend.predict_elo(pgn)
         
-    print("Parsed Game:", game, flush=True)
-    print("Extracted Moves:", moves_list, flush=True)
+        print(f"Predicted Elo: White - {white_elo}, Black - {black_elo}", flush=True)
 
-    return jsonify({"message": "PGN received successfully", "moves": moves_list})
+        return jsonify({
+            "message": "PGN processed successfully",
+            "white_elo": white_elo,
+            "black_elo": black_elo
+        })
+
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
