@@ -5,11 +5,7 @@ import numpy as np
 import chess_utils
 import joblib
 
-def gaussian_kernel(distances):
-    weights = np.exp(-75 * (distances ** 2))
-    return weights / np.sum(weights)
-
-nn_model = joblib.load("models/knn_model.pkl")
+nn_model = joblib.load("nn_model1.pkl")
 
 
 def predict_elo(pgn_text, move_limit=35):
