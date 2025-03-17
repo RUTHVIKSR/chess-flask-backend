@@ -4,3 +4,4 @@ gunicorn
 Flask-Cors
 joblib
 gunicorn
+numpy
